@@ -1,0 +1,17 @@
+{
+  "name": "@kidlib/create-component",
+  "version": "0.1.0",
+  "description": "Lightweight reactive vanilla JS component factory with automatic input state preservation",
+  "type": "module",
+  "exports": {
+    ".": "./src/component.js"
+  },
+  "files": [
+    "src"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KristinnRoach/create-component.git"
+  }
+}

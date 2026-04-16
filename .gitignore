@@ -1,4 +1,8 @@
 node_modules/
+
+# WIP
 wip-interop/
 wip-van-components/
+
+# NOTES
 TODO.md

@@ -1,6 +1,6 @@
 {
   "name": "@kidlib/create-component",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Lightweight reactive vanilla JS component factory with automatic input state preservation",
   "type": "module",
   "exports": {
@@ -24,7 +24,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "changeset": "changeset",
-    "version": "changeset version",
+    "bump": "changeset version",
     "release": "pnpm test && changeset publish"
   },
   "homepage": "https://github.com/KristinnRoach/create-component#readme",

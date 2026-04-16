@@ -697,8 +697,8 @@ describe('createComponent - Critical Usage Issues', () => {
       expect(errorHandler).toHaveBeenCalledTimes(1);
     });
 
-    it('should not bind on* attributes whose value is not in handlers map', () => {
-      // Inline JS onerror should pass through untouched (not matched to any handler)
+    it('should remove on* attributes even when no matching handler exists', () => {
+      // All on* attributes are stripped for security (prevents inline JS execution)
       const component = createComponent({
         initialProps: {},
         template: `<img src="x.jpg" onerror="console.log('inline')" />`,
@@ -707,8 +707,7 @@ describe('createComponent - Critical Usage Issues', () => {
       });
 
       const img = component.querySelector('img');
-      // The onerror attribute should still be there since no handler matched
-      expect(img.getAttribute('onerror')).toBe("console.log('inline')");
+      expect(img.getAttribute('onerror')).toBeNull();
     });
   });
 

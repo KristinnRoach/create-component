@@ -174,8 +174,11 @@ const createComponent = ({
       restoreMediaState(element, mediaState);
     }
 
-    // Notify listeners // TODO: optimize
-    renderListeners.forEach((listener) => listener({ ...currentProps }));
+    // Notify listeners
+    if (renderListeners.length > 0) {
+      const snapshot = { ...currentProps };
+      renderListeners.forEach((listener) => listener(snapshot));
+    }
   };
 
   const notifyPropsUpdated = (changedKeys) => {

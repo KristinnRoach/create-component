@@ -9,9 +9,17 @@
   "files": [
     "src"
   ],
+  "keywords": [
+    "component",
+    "vanilla-js",
+    "reactive",
+    "lightweight",
+    "dom"
+  ],
+  "homepage": "https://github.com/KristinnRoach/create-component#readme",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/KristinnRoach/create-component.git"
+    "url": "git+https://github.com/KristinnRoach/create-component.git"
   }
 }

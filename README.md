@@ -1,10 +1,10 @@
 # createComponent
 
-Lightweight reactive vanilla JS component factory with automatic input state preservation.
+Lightweight, reactive vanilla JS component factory with automatic input state preservation.
 
 ## Basic Usage
 
-```javascript
+```js
 import createComponent from './createComponent.js';
 
 const card = createComponent({
@@ -19,16 +19,16 @@ const card = createComponent({
 // Update props
 card.name = 'Grace';
 card.count++;
-
-// Batch update
 card.update({ name: 'Alan', count: 10 });
 ```
 
 ## Event Handlers
 
-Any `on<event>` attribute in the template can reference a handler by name — not just `onclick`.
+- Use any `on<event>` attribute in the template (not just `onclick`).
+- Handler names must match keys in the `handlers` object.
+- All handlers survive re-renders automatically.
 
-```javascript
+```js
 const counter = createComponent({
   initialProps: { count: 0 },
   template: `
@@ -47,21 +47,14 @@ const counter = createComponent({
   },
   parent: document.body,
 });
-
-// All handlers survive re-renders automatically
 ```
 
 ### Custom Events
 
-The attribute name just maps to `addEventListener(eventType, fn)` — so you can use **any** event name, including Custom Events. The `on` prefix is stripped to get the event type:
+- Any `on<event>` attribute maps to `addEventListener(event, handler)`.
+- Custom events must be dispatched manually (not user-triggered):
 
-```text
-onrequestcoolstuff="docoolstuff"  →  addEventListener('requestcoolstuff', fn)
-```
-
-This means custom events work, but they won't fire from user interaction — you'd need to dispatch them manually:
-
-```javascript
+```js
 const widget = createComponent({
   template: `<div onrequestcoolstuff="docoolstuff">Woah!</div>`,
   handlers: {
@@ -70,7 +63,7 @@ const widget = createComponent({
   parent: document.body,
 });
 
-// Fire it manually
+// Fire manually
 widget
   .querySelector('div')
   .dispatchEvent(
@@ -78,11 +71,11 @@ widget
   );
 ```
 
-For most cases, stick to standard DOM events (`click`, `error`, `change`, `input`, `submit`, `mouseenter`, etc.).
+Stick to standard DOM events (`click`, `error`, `change`, etc.) for most cases.
 
-## With Inputs
+## Inputs
 
-```javascript
+```js
 const form = createComponent({
   initialProps: { label: 'Name' },
   template: `
@@ -92,97 +85,96 @@ const form = createComponent({
   parent: document.body,
 });
 
-// User's typed text is automatically preserved during re-renders
+// User's typed text is preserved during re-renders
 form.label = 'Full Name'; // Input value stays intact
 ```
 
 ## Options
 
-```javascript
-createComponent({
-  initialProps: {
-    /* ... */
+- `initialProps`: Initial properties (object)
+- `template`: Template string (string)
+- `parent`: Parent element (HTMLElement, optional)
+- `containerTag`: Root element tag (default: 'div')
+- `className`: CSS class (optional)
+- `handlers`: Event handlers (object, optional)
+- `onMount`: Called after first render (function, optional)
+- `onCleanup`: Cleanup function or array (optional)
+- `autoAppend`: Auto-append to parent (default: true)
+- `preserveInputState`: Preserve input/media state (default: true)
+- `templateFns`: Custom template functions for `[[prefix:key]]` placeholders (object, optional)
+
+## Custom Template Functions (`templateFns`)
+
+- Use `templateFns` to add custom placeholder logic in templates: `[[prefix:key]]`.
+- Each key is a prefix (letters/numbers/underscores only), value is a function `(key) => string` or `{ resolve, onChange }`.
+- Example: translation or formatting.
+
+```js
+const comp = createComponent({
+  template: `<span>[[t:greeting]] [[user]]</span>`,
+  initialProps: { user: 'Ada' },
+  templateFns: {
+    t: (key) => ({ greeting: 'Hello', bye: 'Goodbye' })[key] || key,
   },
-  template: `/* ... */`,
-  parent: document.body, // Optional: parent element
-  containerTag: 'section', // Optional: default 'div'
-  className: 'my-class', // Optional: CSS class
-  onMount: (el) => {
-    /* runs once after initial render (after append if autoAppend) */
-  },
-  onCleanup: () => {
-    /* runs on dispose() */
-  },
-  autoAppend: true, // Optional: default true
-  preserveInputState: true, // Optional: default true
 });
+// Renders: <span>Hello Ada</span>
 ```
+
+// Advanced: reactive templateFns can use `{ resolve, onChange }` for auto re-render (see source for details).
 
 ## Nested Properties
 
-```javascript
+```js
 const profile = createComponent({
-  initialProps: {
-    user: { name: 'Ada', age: 30 },
-  },
+  initialProps: { user: { name: 'Ada', age: 30 } },
   template: `<p>[[user.name]] is [[user.age]]</p>`,
 });
 ```
 
 ## Template Syntax & Limitations
 
-**✅ Supported:**
+**Supported:**
 
-```javascript
-[[propName]][[user.name]][[contentHtml]]; // Simple property // Nested property // Raw HTML (props ending with "Html")
-```
+- `[[prop]]` — simple property
+- `[[user.name]]` — nested property
+- `[[contentHtml]]` — raw HTML (props ending with `Html`)
 
-**❌ NOT Supported (expressions):**
+**Not supported:**
 
-```javascript
-[[count > 0 ? 'yes' : 'no']][[items.length]][[price * 1.1]][ // Conditional expressions // Method calls // Arithmetic
-  [name.toUpperCase()]
-]; // String methods
-```
+- Expressions, method calls, arithmetic, or string methods (e.g., `[[count > 0 ? 'yes' : 'no']]`, `[[items.length]]`, `[[price * 1.1]]`, `[[name.toUpperCase()]]`)
 
-**Why:** Templates use simple string interpolation, not JavaScript evaluation. Expressions are treated as property paths and return empty string when not found.
+Templates use string interpolation only. Expressions are treated as property paths and return an empty string if not found.
 
-**Workaround:** Use `onPropUpdated()` for dynamic behavior:
+**Workaround:** Use listeners for dynamic behavior:
 
-```javascript
+```js
 const toggle = createComponent({
   initialProps: { count: 0 },
   template: `<span class="badge">[[count]]</span>`,
 });
 
-// Set initial state
-let initialBadge = toggle.querySelector('.badge');
-if (initialBadge) initialBadge.style.display = 'none';
-
 toggle.onPropUpdated('count', (count) => {
-  // IMPORTANT: Re-query element each time - re-renders create new DOM elements
+  // Always re-query elements inside the callback
   const badge = toggle.querySelector('.badge');
-  if (badge) {
-    badge.style.display = count > 0 ? 'flex' : 'none';
-  }
+  if (badge) badge.style.display = count > 0 ? 'flex' : 'none';
 });
 ```
 
 **Template String Escaping:**
-When writing templates inside template literals, use `[[prop]]` to avoid JavaScript interpolation issues:
+Use `[[prop]]` in template literals to avoid JS interpolation issues.
 
-```javascript
-// ✅ Preferred - no escaping needed
+```js
+// Preferred
 template: `<div>[[count]]</div>`;
-
-// Legacy (still supported, but not recommended):
+// Legacy (still supported):
 // template: `<div>${'${'}count${'}'}</div>`
 ```
 
 ## Raw HTML (XSS Risk)
 
-```javascript
-// Properties ending with "Html" are NOT sanitized
+- Properties ending with `Html` are NOT sanitized.
+
+```js
 const card = createComponent({
   initialProps: {
     safeText: '<script>alert(1)</script>', // Sanitized
@@ -197,22 +189,19 @@ const card = createComponent({
 
 ## Cleanup
 
-```javascript
-// Basic cleanup - removes listeners and detaches from DOM
+- `dispose()` removes listeners and detaches from DOM.
+- `onCleanup` can be a function or array of functions.
+
+```js
 component.dispose();
 
-// With custom cleanup function (e.g., unsubscribe from Firebase)
 const authComponent = createComponent({
   initialProps: { user: null },
-  template: `<div>\${user ? user.name : 'Guest'}</div>`,
-  onCleanup: () => {
-    // Called automatically when dispose() is invoked
-    unsubscribeAuth();
-  },
+  template: `<div>${user ? user.name : 'Guest'}</div>`,
+  onCleanup: () => unsubscribeAuth(),
   parent: document.body,
 });
 
-// With multiple cleanup functions
 const component = createComponent({
   initialProps: {
     /* ... */
@@ -225,23 +214,18 @@ const component = createComponent({
   ],
   parent: document.body,
 });
-
-// Later...
-component.dispose(); // Runs all cleanup functions, then removes component
 ```
 
 ## onMount
 
-```javascript
-// Called once right after the first render.
-// If autoAppend is true (default) and parent is provided,
-// onMount runs after the element has been appended to the parent.
+- Called once after the first render (after append if `autoAppend` is true).
+
+```js
 const comp = createComponent({
   initialProps: { text: 'Hello' },
-  template: `<div>\${text}</div>`,
+  template: `<div>${text}</div>`,
   parent: document.body,
   onMount: (el) => {
-    // el is the root element of the component
     el.setAttribute('data-mounted', '1');
   },
 });
@@ -249,63 +233,29 @@ const comp = createComponent({
 
 ## Listeners
 
-```javascript
-// After each render (DOM updated)
-card.onRender((props) => console.log('Rendered:', props));
+- `onPropUpdated(prop, callback)`: React to a specific prop change. Always re-query elements inside the callback.
+- `onRender(callback)`: Runs after any prop change and re-render. Use for multiple props or when you need the full props object.
+- `onAnyPropUpdated(callback)`: Runs on any prop change, even if not in the template or before re-render. Use for performance-critical or advanced scenarios.
 
-// Any prop change (render optional)
-card.onAnyPropUpdated(({ changedKeys }) =>
-  console.log('Changed:', changedKeys),
-);
+**Rule of thumb:**
 
-// Specific prop
-card.onPropUpdated('count', (v) => console.log('count →', v));
-```
+- Most cases: `onPropUpdated`
+- Multiple props: `onRender`
+- Advanced/performance: `onAnyPropUpdated`
 
-### When to Use Which Listener?
-
-**Use `onPropUpdated(prop, callback)`** when:
-
-- ✅ You need to update DOM elements that are IN the template
-- ✅ You need to react to a specific prop change
-- ✅ **Always re-query elements inside the callback** (re-renders create new DOM)
-
-```javascript
+```js
 toggle.onPropUpdated('count', (count) => {
-  const badge = toggle.querySelector('.badge'); // ✅ Query fresh each time
+  const badge = toggle.querySelector('.badge');
   if (badge) badge.textContent = count;
 });
-```
 
-**Use `onRender(callback)`** when:
-
-- ✅ You need to do something after ANY prop changes and re-render
-- ✅ You're working with multiple props at once
-- ✅ You need the full props object
-
-```javascript
 card.onRender(({ name, email }) => {
-  // Runs after any prop change that triggers re-render
   console.log(`Card updated: ${name} (${email})`);
 });
-```
 
-**Use `onAnyPropUpdated(callback)`** when:
-
-- ✅ You need to track changes WITHOUT waiting for re-render
-- ✅ You need to know which specific props changed
-- ✅ Performance-critical scenarios (runs even if no re-render)
-
-```javascript
 card.onAnyPropUpdated(({ props, changedKeys }) => {
   if (changedKeys.includes('count')) {
     // React immediately, even if 'count' isn't in template
   }
 });
 ```
-
-**Rule of thumb:**
-
-- 90% of the time → `onPropUpdated` (and always re-query elements!)
-- Multiple props → `onRender`
-- Advanced/performance → `onAnyPropUpdated`

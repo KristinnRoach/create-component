@@ -1,6 +1,6 @@
 {
   "name": "@kidlib/create-component",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lightweight reactive vanilla JS component factory with automatic input state preservation",
   "type": "module",
   "exports": {

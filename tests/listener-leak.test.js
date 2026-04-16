@@ -1,6 +1,6 @@
 // Test to verify event listeners don't accumulate on re-render
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import createComponent from '../src/component.js';
+import createComponent from '../src/createComponent.js';
 
 describe('Event Listener Memory - No Leaks', () => {
   let container;

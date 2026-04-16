@@ -1,6 +1,6 @@
 // src/shared/utils/dom/component.test.js
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import createComponent from '../src/component.js';
+import createComponent from '../src/createComponent.js';
 
 describe('createComponent - Critical Usage Issues', () => {
   let container;

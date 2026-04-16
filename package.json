@@ -4,7 +4,7 @@
   "description": "Lightweight reactive vanilla JS component factory with automatic input state preservation",
   "type": "module",
   "exports": {
-    ".": "./src/component.js"
+    ".": "./src/createComponent.js"
   },
   "files": [
     "src"

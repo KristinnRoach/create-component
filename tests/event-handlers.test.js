@@ -1,6 +1,6 @@
 // Test for event handler binding in createComponent
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import createComponent from '../src/component.js';
+import createComponent from '../src/createComponent.js';
 
 describe('createComponent - Event Handler Binding', () => {
   let container;

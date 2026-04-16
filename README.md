@@ -5,7 +5,7 @@ Lightweight reactive vanilla JS component factory with automatic input state pre
 ## Basic Usage
 
 ```javascript
-import createComponent from './component.js';
+import createComponent from './createComponent.js';
 
 const card = createComponent({
   initialProps: { name: 'Ada', count: 0 },
@@ -134,18 +134,15 @@ const profile = createComponent({
 **✅ Supported:**
 
 ```javascript
-[[propName]]                    // Simple property
-[[user.name]]                   // Nested property
-[[contentHtml]]                 // Raw HTML (props ending with "Html")
+[[propName]][[user.name]][[contentHtml]]; // Simple property // Nested property // Raw HTML (props ending with "Html")
 ```
 
 **❌ NOT Supported (expressions):**
 
 ```javascript
-[[count > 0 ? 'yes' : 'no']]   // Conditional expressions
-[[items.length]]                // Method calls
-[[price * 1.1]]                 // Arithmetic
-[[name.toUpperCase()]]          // String methods
+[[count > 0 ? 'yes' : 'no']][[items.length]][[price * 1.1]][ // Conditional expressions // Method calls // Arithmetic
+  [name.toUpperCase()]
+]; // String methods
 ```
 
 **Why:** Templates use simple string interpolation, not JavaScript evaluation. Expressions are treated as property paths and return empty string when not found.

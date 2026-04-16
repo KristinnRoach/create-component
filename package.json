@@ -9,6 +9,10 @@
   "files": [
     "src"
   ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "component",
     "vanilla-js",
@@ -17,9 +21,11 @@
     "dom"
   ],
   "scripts": {
-    "bump": "npm version patch",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm test && changeset publish"
   },
   "homepage": "https://github.com/KristinnRoach/create-component#readme",
   "license": "MIT",
@@ -28,6 +34,7 @@
     "url": "git+https://github.com/KristinnRoach/create-component.git"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.30.0",
     "jsdom": "^29.0.2",
     "vitest": "^4.1.4"
   }

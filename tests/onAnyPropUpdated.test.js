@@ -1,6 +1,6 @@
 // Minimal tests for onAnyPropUpdated
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import createComponent from '../component.js';
+import createComponent from '../src/component.js';
 
 describe('createComponent - onAnyPropUpdated', () => {
   let container;

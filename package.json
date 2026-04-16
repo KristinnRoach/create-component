@@ -16,10 +16,18 @@
     "lightweight",
     "dom"
   ],
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
   "homepage": "https://github.com/KristinnRoach/create-component#readme",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/KristinnRoach/create-component.git"
+  },
+  "devDependencies": {
+    "jsdom": "^29.0.2",
+    "vitest": "^4.1.4"
   }
 }

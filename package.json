@@ -23,7 +23,7 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "changeset": "changeset",
+    "changeset": "EDITOR='code --wait' changeset",
     "bump": "changeset version",
     "release": "pnpm test && changeset publish"
   },

@@ -17,8 +17,7 @@
     "dom"
   ],
   "scripts": {
-    "patch": "npm version patch",
-    "publish": "npm publish --access public",
+    "bump": "npm version patch",
     "test": "vitest run",
     "test:watch": "vitest"
   },

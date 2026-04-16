@@ -5,8 +5,8 @@ import {
   sanitize,
   restoreInputState,
   restoreMediaState,
-} from './component-utils.js';
-import { isDOMReady } from './dom-utils.js';
+} from './componentUtils.js';
+import { isDOMReady } from './domUtils.js';
 
 // === MAIN VANILLA JS COMPONENT FUNCTION ===
 
@@ -314,7 +314,6 @@ const createComponent = ({
   if (typeof onMount === 'function') {
     try {
       onMount(element);
-      // setTimeout(() => onMount(element), 0); // ! Testing setTimeout to avoid blocking
     } catch (e) {
       console.warn(
         '[createComponent]: Error in onMount handler of component',
@@ -344,7 +343,7 @@ export default createComponent;
  *   `,
  *   parent: document.body,
  *   containerTag: 'section',  // optional, default is 'div'
- *   class: 'my-component',    // optional, adds CSS class to container
+ *   className: 'my-component', // optional, adds CSS class to container
  *   autoAppend: true,         // default is true
  * });
  *

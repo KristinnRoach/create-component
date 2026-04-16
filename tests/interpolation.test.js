@@ -1,7 +1,7 @@
 // interpolation.test.js
 // Minimal tests for template interpolation (legacy and preferred syntax)
 import { describe, it, expect } from 'vitest';
-import { interpolate } from '../src/component-utils.js';
+import { interpolate } from '../src/componentUtils.js';
 
 describe('interpolate', () => {
   it('replaces [[prop]] with value', () => {

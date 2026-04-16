@@ -197,7 +197,7 @@ component.dispose();
 
 const authComponent = createComponent({
   initialProps: { user: null },
-  template: `<div>${user ? user.name : 'Guest'}</div>`,
+  template: `<div>[[user.name]]</div>`,
   onCleanup: () => unsubscribeAuth(),
   parent: document.body,
 });
@@ -223,7 +223,7 @@ const component = createComponent({
 ```js
 const comp = createComponent({
   initialProps: { text: 'Hello' },
-  template: `<div>${text}</div>`,
+  template: `<div>[[text]]</div>`,
   parent: document.body,
   onMount: (el) => {
     el.setAttribute('data-mounted', '1');
@@ -264,3 +264,4 @@ card.onAnyPropUpdated(({ props, changedKeys }) => {
 
 - Only properties defined in `initialProps` are reactive. Setting or updating new properties later will not make them reactive or trigger listeners/renders.
 - The entire container is re-rendered on any prop change that affects the template. For large templates, this may be inefficient.
+- All `on*` attributes are stripped from the DOM on every render for security. Only attributes whose values match a key in the `handlers` map get bound as event listeners — inline JS (e.g., `onerror="alert(1)"`) is never executed.

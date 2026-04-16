@@ -259,3 +259,8 @@ card.onAnyPropUpdated(({ props, changedKeys }) => {
   }
 });
 ```
+
+## Limitations
+
+- Only properties defined in `initialProps` are reactive. Setting or updating new properties later will not make them reactive or trigger listeners/renders.
+- The entire container is re-rendered on any prop change that affects the template. For large templates, this may be inefficient.

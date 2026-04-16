@@ -39,9 +39,6 @@ const createComponent = ({
   template = '',
   handlers = {},
   parent = null,
-  // TODO: autoWrap??,
-  // !? Get rid of automatic wrapper if not requested to avoid unexpected extra containers + className applies to wrapper!!?
-  // !? Deferred to when able to check ALL usage of createComponent (also blood pressure app?). After that, move to self contained repo I can publish and import anywhere.
   containerTag = 'div',
   className = '',
   onMount = null,
@@ -162,10 +159,9 @@ const createComponent = ({
     allEls.forEach((el) => {
       for (const attr of Array.from(el.attributes)) {
         if (!attr.name.startsWith('on')) continue;
-        if (!(attr.value in handlers)) continue;
-        const fn = handlers[attr.value];
         const eventType = attr.name.slice(2); // "onclick" -> "click"
-        el.removeAttribute(attr.name);
+        const fn = handlers[attr.value];
+        el.removeAttribute(attr.name); // Always remove attribute for safety
         if (typeof fn === 'function') {
           el.addEventListener(eventType, fn);
         }

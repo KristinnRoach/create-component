@@ -1,6 +1,18 @@
-# createComponent
+# create-component
 
 Lightweight, reactive vanilla JS component factory with automatic input state preservation.
+
+[![npm version](https://img.shields.io/npm/v/@kidlib/create-component.svg?label=%40kidlib%2Fcreate-component)](https://www.npmjs.com/package/@kidlib/create-component)
+
+## Install
+
+```sh
+pnpm add @kidlib/create-component
+# or
+yarn add @kidlib/create-component
+# or
+npm install @kidlib/create-component
+```
 
 ## Basic Usage
 

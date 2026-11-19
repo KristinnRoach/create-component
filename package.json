@@ -34,8 +34,8 @@
     "url": "git+https://github.com/KristinnRoach/create-component.git"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.30.0",
-    "jsdom": "^29.0.2",
-    "vitest": "^4.1.4"
+    "@changesets/cli": "^3.0.3",
+    "jsdom": "^31.0.1",
+    "vitest": "^5.1.1"
   }
 }

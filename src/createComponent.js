@@ -1,8 +1,9 @@
 import {
   captureInputState,
   captureMediaState,
+  escapeHtml,
   html,
-  sanitize,
+  INTERPOLATION_REGEX,
   restoreInputState,
   restoreMediaState,
 } from './componentUtils.js';
@@ -104,13 +105,20 @@ const createComponent = ({
     }
   }
 
+  const templateFnPatterns = Object.entries(templateFnResolvers).map(
+    ([prefix, fn]) => ({
+      prefix,
+      fn,
+      pattern: new RegExp(`\\[\\[${prefix}:([^\\]]+)\\]\\]`, 'g'),
+    }),
+  );
+
   // Track which props are actually used in the template
   const usedProps = new Set();
-  const placeholderRegex = /\[\[([^\]]+)\]\]|\$\{([^}]+)\}/g;
-  let match;
-  while ((match = placeholderRegex.exec(template)) !== null) {
-    const key = (match[1] || match[2]).trim().split('.')[0]; // Get root prop (e.g., "user" from "user.name")
-    usedProps.add(key);
+  const placeholders = String(template).matchAll(INTERPOLATION_REGEX);
+  for (const [, bracketKey, dollarKey] of placeholders) {
+    const path = (bracketKey ?? dollarKey).trim();
+    usedProps.add(path.split('.')[0]);
   }
 
   // Global update listeners (any prop updated)
@@ -131,21 +139,19 @@ const createComponent = ({
 
     // Pre-resolve templateFns (e.g. [[t:key]] → resolved string) before prop interpolation
     let resolvedTemplate = template;
-    for (const [prefix, fn] of Object.entries(templateFnResolvers)) {
-      resolvedTemplate = resolvedTemplate.replace(
-        new RegExp(`\\[\\[${prefix}:([^\\]]+)\\]\\]`, 'g'),
-        (_, key) => {
-          try {
-            return sanitize(String(fn(key.trim()) ?? ''));
-          } catch (e) {
-            console.warn(
-              `[createComponent]: templateFns.${prefix} threw for key "${key.trim()}"`,
-              e,
-            );
-            return `[[${prefix}:${key.trim()}]]`; // Preserve placeholder for debugging
-          }
-        },
-      );
+    for (const { prefix, fn, pattern } of templateFnPatterns) {
+      resolvedTemplate = resolvedTemplate.replace(pattern, (_, key) => {
+        const arg = key.trim();
+        try {
+          return escapeHtml(fn(arg) ?? '');
+        } catch (e) {
+          console.warn(
+            `[createComponent]: templateFns.${prefix} threw for key "${arg}"`,
+            e,
+          );
+          return `[[${prefix}:${arg}]]`; // Preserve placeholder for debugging
+        }
+      });
     }
 
     // Render
@@ -214,7 +220,6 @@ const createComponent = ({
   }
 
   element.update = (newProps) => {
-    let changed = false;
     let shouldRender = false;
     const changedKeys = [];
 
@@ -229,14 +234,13 @@ const createComponent = ({
         if (singlePropListeners[key]) {
           singlePropListeners[key].forEach((cb) => cb(newProps[key]));
         }
-        changed = true;
         changedKeys.push(key);
       }
     }
 
     // Only re-render if a prop used in the template changed
-    if (changed && shouldRender) {
-      render(); // render() already calls updateListeners
+    if (shouldRender) {
+      render();
     }
 
     // Notify global props-updated listeners once per batch

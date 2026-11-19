@@ -1,25 +1,20 @@
 // === Helpers for creating DOM components ===
 
-/**
- * Escapes HTML special characters to prevent XSS vulnerabilities.
- * @param {string} str - The raw string to sanitize.
- * @returns {string} The escaped, safe string.
- */
-const sanitize = (str) => {
-  const s = String(str);
-  return s.replace(/[&<>"'`=\/]/g, (char) => {
-    return {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;',
-      '`': '&#x60;',
-      '=': '&#x3D;',
-      '/': '&#x2F;',
-    }[char];
-  });
+const HTML_ENTITIES = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+  '`': '&#x60;',
+  '=': '&#x3D;',
+  '/': '&#x2F;',
 };
+
+// Escape markup characters for HTML interpolation. Other contexts, such as
+// URLs, need their own validation.
+const escapeHtml = (value) =>
+  String(value).replace(/[&<>"'`=\/]/g, (char) => HTML_ENTITIES[char]);
 
 /**
  * Supported interpolation syntaxes for templates.
@@ -49,7 +44,7 @@ const interpolate = (templateStr, props) => {
       if (value == null) return '';
       // Properties ending with "Html" are treated as raw/unsafe HTML
       const isHtml = trimmedKey.endsWith('Html');
-      return isHtml ? String(value) : sanitize(String(value));
+      return isHtml ? String(value) : escapeHtml(value);
     },
   );
 };
@@ -58,12 +53,13 @@ const interpolate = (templateStr, props) => {
  * Converts a template string and props into a DocumentFragment with interpolated HTML.
  * @param {string} templateStr - The template string with placeholders.
  * @param {Object} [props={}] - The props to interpolate.
- * @returns {DocumentFragment} The cloned fragment with rendered HTML.
+ * @returns {DocumentFragment} The fragment with rendered HTML.
  */
 const createDOMFragment = (templateStr, props = {}) => {
   const template = document.createElement('template');
   template.innerHTML = interpolate(templateStr, props);
-  return template.content.cloneNode(true);
+  // This template is parsed for a single render, so its nodes can be moved.
+  return template.content;
 };
 
 // Build a DOM path (children indexes) from root->target for later lookup
@@ -92,18 +88,19 @@ const getElementByPath = (root, path) => {
  * Capture input state (values, selection, focus).
  */
 const captureInputState = (element) => {
-  return Array.from(element.querySelectorAll('input, textarea, select')).map(
-    (el) => ({
-      name: el.name,
-      id: el.id,
-      path: getPathForElement(element, el),
+  return Array.from(element.querySelectorAll('input, textarea, select'), (el) => {
+    const { name, id } = el;
+    return {
+      name,
+      id,
+      path: name || id ? null : getPathForElement(element, el),
       value: el.value,
       checked: el.checked,
       selectionStart: el.selectionStart,
       selectionEnd: el.selectionEnd,
       wasFocused: document.activeElement === el,
-    }),
-  );
+    };
+  });
 };
 
 // Use the native `CSS.escape` when available, otherwise fall back to a
@@ -209,7 +206,8 @@ const restoreMediaState = (element, states) => {
 
 export {
   createDOMFragment as html,
-  sanitize,
+  escapeHtml,
+  INTERPOLATION_REGEX,
   interpolate,
   captureInputState,
   restoreInputState,

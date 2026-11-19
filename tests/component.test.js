@@ -533,6 +533,25 @@ describe('createComponent - Critical Usage Issues', () => {
   });
 
   describe('7. Edge Cases & Error Handling', () => {
+    it('upgrades custom elements from the rendered fragment on each render', () => {
+      const connected = vi.fn();
+      customElements.define('rendered-fragment-test', class extends HTMLElement {
+        connectedCallback() {
+          connected(this.textContent);
+        }
+      });
+
+      const component = createComponent({
+        initialProps: { label: 'First' },
+        template: '<rendered-fragment-test>[[label]]</rendered-fragment-test>',
+        parent: container,
+      });
+
+      component.label = 'Second';
+
+      expect(connected.mock.calls).toEqual([['First'], ['Second']]);
+    });
+
     it('should handle undefined/null prop values', () => {
       const component = createComponent({
         initialProps: { name: undefined, age: null, city: '' },

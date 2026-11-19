@@ -182,14 +182,16 @@ template: `<div>[[count]]</div>`;
 // template: `<div>${'${'}count${'}'}</div>`
 ```
 
-## Raw HTML (XSS Risk)
+## Escaping and Raw HTML
 
-- Properties ending with `Html` are NOT sanitized.
+Ordinary placeholders escape HTML markup characters. Use them in text and quoted attributes that accept plain text. Validate dynamic URLs before passing them in, and keep untrusted values out of script and style contexts.
+
+Properties ending with `Html` insert markup directly. Pass only trusted or previously sanitized HTML to these properties, and write the template string itself as trusted application code.
 
 ```js
 const card = createComponent({
   initialProps: {
-    safeText: '<script>alert(1)</script>', // Sanitized
+    safeText: '<strong>Plain text</strong>', // Escaped
     iconHtml: '<i data-lucide="user"></i>', // Raw HTML
   },
   template: `

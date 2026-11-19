@@ -101,6 +101,8 @@ const form = createComponent({
 form.label = 'Full Name'; // Input value stays intact
 ```
 
+With `preserveInputState` enabled, a template with one simple text binding such as `<p>Count: [[count]]</p>` can update in place. Sibling inputs keep their DOM nodes, focus, and selection. Templates with more than one binding, dynamic attributes, or raw HTML use the full render path.
+
 ## Options
 
 - `initialProps`: Initial properties (object)

@@ -205,6 +205,83 @@ describe('createComponent - Critical Usage Issues', () => {
   });
 
   describe('4. DOM State Loss on Re-render (KNOWN LIMITATION)', () => {
+    it.each(['[[count]]', '${count}'])('updates %s without touching a focused input', (binding) => {
+      const component = createComponent({
+        initialProps: { count: 0 },
+        template: `<p>Count: ${binding}</p><input>`,
+        parent: container,
+      });
+      const counter = component.querySelector('p');
+      const text = counter.firstChild;
+      const input = component.querySelector('input');
+      input.focus();
+      input.value = 'Still typing';
+      input.setSelectionRange(2, 5, 'backward');
+      const onRender = vi.fn();
+      component.onRender(onRender);
+
+      component.count = 1;
+      component.update({ count: '<b>2</b>' });
+
+      expect(counter.firstChild).toBe(text);
+      expect(counter.textContent).toBe('Count: <b>2</b>');
+      expect(component.querySelector('input')).toBe(input);
+      expect(document.activeElement).toBe(input);
+      expect(input.value).toBe('Still typing');
+      expect([input.selectionStart, input.selectionEnd, input.selectionDirection]).toEqual([
+        2, 5, 'backward',
+      ]);
+      expect(onRender.mock.calls).toEqual([[{ count: 1 }], [{ count: '<b>2</b>' }]]);
+    });
+
+    it.each([
+      ['<span title="[[label]]">Name</span>', 'label'],
+      ['<span>[[label]] <em>now</em></span>', 'label'],
+      ['<span>[[labelHtml]]</span>', 'labelHtml'],
+      ['<span>[[label]] [[other]]</span>', 'label'],
+      ['<textarea>[[label]]</textarea>', 'label'],
+    ])('keeps full rendering for %s', (template, key) => {
+      const component = createComponent({
+        initialProps: { [key]: 'First' },
+        template,
+      });
+      const original = component.firstElementChild;
+
+      component.update({ [key]: 'Second' });
+
+      expect(component.firstElementChild).not.toBe(original);
+    });
+
+    it('keeps full rendering when input state preservation is disabled', () => {
+      const component = createComponent({
+        initialProps: { label: 'First' },
+        template: '<p>[[label]]</p><input value="Initial">',
+        preserveInputState: false,
+      });
+      component.querySelector('input').value = 'Edited';
+
+      component.label = 'Second';
+
+      expect(component.querySelector('input').value).toBe('Initial');
+    });
+
+    it('falls back when the bound element leaves the component', () => {
+      const component = createComponent({
+        initialProps: { label: '' },
+        template: '<label>[[label]]</label>',
+      });
+      const label = component.firstElementChild;
+      expect(label.firstChild).toBeNull();
+      component.label = 'First';
+      expect(component.firstElementChild).toBe(label);
+      label.remove();
+
+      component.label = 'Second';
+
+      expect(component.firstElementChild.textContent).toBe('Second');
+      expect(label.textContent).toBe('First');
+    });
+
     it('should PRESERVE input focus when updating unused props', () => {
       const component = createComponent({
         initialProps: { label: 'Name', value: 'Ada', metadata: {} },

@@ -2,8 +2,10 @@ import {
   captureInputState,
   captureMediaState,
   escapeHtml,
+  getBindingText,
   html,
   INTERPOLATION_REGEX,
+  prepareTextBinding,
   restoreInputState,
   restoreMediaState,
 } from './componentUtils.js';
@@ -127,8 +129,9 @@ const createComponent = ({
 
   // Per-prop listeners map: { propName: [callback, ...] }
   const singlePropListeners = {};
+  let textBinding;
 
-  const render = () => {
+  const renderContents = () => {
     // Capture state before render if needed
     let inputState = [];
     let mediaState = [];
@@ -156,8 +159,12 @@ const createComponent = ({
 
     // Render
     element.textContent = '';
-    const content = html(resolvedTemplate, currentProps);
-    element.appendChild(content);
+    const prepared =
+      textBinding === undefined && preserveInputState && !templateFnPatterns.length
+        ? prepareTextBinding(resolvedTemplate, currentProps)
+        : null;
+    textBinding = prepared?.binding ?? null;
+    element.appendChild(prepared?.content ?? html(resolvedTemplate, currentProps));
 
     // Attach event handlers for any on<event>="handlerName" attributes
     // Single DOM walk: for each on* attr, look up handler by name
@@ -179,6 +186,26 @@ const createComponent = ({
       restoreInputState(element, inputState);
       restoreMediaState(element, mediaState);
     }
+  };
+
+  const updateText = () => {
+    if (!textBinding) return false;
+    const { parent, key, prefix, suffix } = textBinding;
+    if (!Node.prototype.contains.call(element, parent)) return false;
+
+    const child = parent.firstChild;
+    if (child && (child.nodeType !== Node.TEXT_NODE || child.nextSibling)) return false;
+
+    const value = getBindingText(currentProps[key]);
+    if (value === null) return false;
+    const text = prefix + value + suffix;
+    const target = text && child ? child : parent;
+    if (target.textContent !== text) target.textContent = text;
+    return true;
+  };
+
+  const render = () => {
+    if (!updateText()) renderContents();
 
     // Notify listeners
     if (renderListeners.length > 0) {

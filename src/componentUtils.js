@@ -62,6 +62,51 @@ const createDOMFragment = (templateStr, props = {}) => {
   return template.content;
 };
 
+const getBindingText = (value) => {
+  if (value == null) return '';
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  // Let the HTML parser handle strings that need input normalization.
+  return typeof value === 'string' && !/[\r\0]/.test(value) ? value : null;
+};
+
+const prepareTextBinding = (template, props) => {
+  const marker = 'kidlib-text-binding';
+  if (typeof template !== 'string' || /[\r\0]/.test(template)) return null;
+  const [match, extra] = template.matchAll(INTERPOLATION_REGEX);
+  if (!match || extra || template.includes(marker)) return null;
+
+  const key = (match[1] ?? match[2]).trim();
+  if (!/^[a-zA-Z_$][\w$]*$/.test(key) || key.endsWith('Html')) return null;
+  // Skip tag names and text that may continue an HTML character reference.
+  if (!/>[^<>&]*$/.test(template.slice(0, match.index))) return null;
+  if (!Object.prototype.hasOwnProperty.call(props, key)) return null;
+  const value = getBindingText(props[key]);
+  if (value === null) return null;
+
+  // Find the placeholder in the parsed DOM so attributes and raw-text elements
+  // cannot be mistaken for ordinary text.
+  const content = createDOMFragment(template.replace(match[0], `<!--${marker}-->`));
+  const comments = document.createTreeWalker(content, NodeFilter.SHOW_COMMENT);
+  let placeholder = comments.nextNode();
+  while (placeholder && placeholder.data !== marker) {
+    placeholder = comments.nextNode();
+  }
+  const parent = placeholder?.parentElement;
+  if (parent?.namespaceURI !== 'http://www.w3.org/1999/xhtml') return null;
+  if (!parent.matches('button, div, em, h1, h2, h3, h4, h5, h6, label, p, span, strong')) {
+    return null;
+  }
+  const children = Array.from(parent.childNodes);
+  if (children.some((node) => node !== placeholder && node.nodeType !== Node.TEXT_NODE)) {
+    return null;
+  }
+
+  const prefix = placeholder.previousSibling?.textContent ?? '';
+  const suffix = placeholder.nextSibling?.textContent ?? '';
+  parent.textContent = prefix + value + suffix;
+  return { content, binding: { parent, key, prefix, suffix } };
+};
+
 // Build a DOM path (children indexes) from root->target for later lookup
 const getPathForElement = (root, target) => {
   const path = [];
@@ -207,10 +252,12 @@ const restoreMediaState = (element, states) => {
 export {
   createDOMFragment as html,
   escapeHtml,
+  getBindingText,
   INTERPOLATION_REGEX,
   interpolate,
   captureInputState,
   restoreInputState,
   captureMediaState,
   restoreMediaState,
+  prepareTextBinding,
 };

@@ -1,5 +1,5 @@
 // src/shared/utils/dom/component.test.js
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vite-plus/test';
 import createComponent from '../src/createComponent.js';
 
 describe('createComponent - Critical Usage Issues', () => {
@@ -535,11 +535,14 @@ describe('createComponent - Critical Usage Issues', () => {
   describe('7. Edge Cases & Error Handling', () => {
     it('upgrades custom elements from the rendered fragment on each render', () => {
       const connected = vi.fn();
-      customElements.define('rendered-fragment-test', class extends HTMLElement {
-        connectedCallback() {
-          connected(this.textContent);
-        }
-      });
+      customElements.define(
+        'rendered-fragment-test',
+        class extends HTMLElement {
+          connectedCallback() {
+            connected(this.textContent);
+          }
+        },
+      );
 
       const component = createComponent({
         initialProps: { label: 'First' },

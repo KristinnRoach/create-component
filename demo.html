@@ -123,8 +123,7 @@
       function addLog(target, message) {
         const entry = document.createElement('div');
         entry.className = 'log-entry';
-        entry.textContent =
-          '[' + new Date().toLocaleTimeString() + '] ' + message;
+        entry.textContent = '[' + new Date().toLocaleTimeString() + '] ' + message;
         target.appendChild(entry);
         target.scrollTop = target.scrollHeight;
       }
@@ -266,11 +265,9 @@
       });
 
       // With default preserveInputState = true, the typed text is preserved across renders
-      document
-        .getElementById('btn-change-label')
-        .addEventListener('click', () => {
-          inputComponent.label = `Label ${++lblCount}`;
-        });
+      document.getElementById('btn-change-label').addEventListener('click', () => {
+        inputComponent.label = `Label ${++lblCount}`;
+      });
 
       // Log initial render
       addLog(log1, 'User card initialized');

@@ -49,9 +49,7 @@ const createComponent = ({
   preserveInputState = true,
 } = {}) => {
   if (!isDOMReady()) {
-    console.error(
-      'createComponent: DOM must be ready before creating components.',
-    );
+    console.error('createComponent: DOM must be ready before creating components.');
     return null;
   }
 
@@ -105,13 +103,11 @@ const createComponent = ({
     }
   }
 
-  const templateFnPatterns = Object.entries(templateFnResolvers).map(
-    ([prefix, fn]) => ({
-      prefix,
-      fn,
-      pattern: new RegExp(`\\[\\[${prefix}:([^\\]]+)\\]\\]`, 'g'),
-    }),
-  );
+  const templateFnPatterns = Object.entries(templateFnResolvers).map(([prefix, fn]) => ({
+    prefix,
+    fn,
+    pattern: new RegExp(`\\[\\[${prefix}:([^\\]]+)\\]\\]`, 'g'),
+  }));
 
   // Track which props are actually used in the template
   const usedProps = new Set();
@@ -145,10 +141,7 @@ const createComponent = ({
         try {
           return escapeHtml(fn(arg) ?? '');
         } catch (e) {
-          console.warn(
-            `[createComponent]: templateFns.${prefix} threw for key "${arg}"`,
-            e,
-          );
+          console.warn(`[createComponent]: templateFns.${prefix} threw for key "${arg}"`, e);
           return `[[${prefix}:${arg}]]`; // Preserve placeholder for debugging
         }
       });
@@ -319,10 +312,7 @@ const createComponent = ({
     try {
       onMount(element);
     } catch (e) {
-      console.warn(
-        '[createComponent]: Error in onMount handler of component',
-        e,
-      );
+      console.warn('[createComponent]: Error in onMount handler of component', e);
       /* no-op */
     }
   }

@@ -78,9 +78,7 @@ const widget = createComponent({
 // Fire manually
 widget
   .querySelector('div')
-  .dispatchEvent(
-    new CustomEvent('requestcoolstuff', { detail: { level: 'max' } }),
-  );
+  .dispatchEvent(new CustomEvent('requestcoolstuff', { detail: { level: 'max' } }));
 ```
 
 Stick to standard DOM events (`click`, `error`, `change`, etc.) for most cases.
@@ -217,9 +215,7 @@ const authComponent = createComponent({
 });
 
 const component = createComponent({
-  initialProps: {
-    /* ... */
-  },
+  initialProps: {/* ... */},
   template: `/* ... */`,
   onCleanup: [
     () => clearInterval(intervalId),

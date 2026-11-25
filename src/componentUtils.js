@@ -13,8 +13,7 @@ const HTML_ENTITIES = {
 
 // Escape markup characters for HTML interpolation. Other contexts, such as
 // URLs, need their own validation.
-const escapeHtml = (value) =>
-  String(value).replace(/[&<>"'`=\/]/g, (char) => HTML_ENTITIES[char]);
+const escapeHtml = (value) => String(value).replace(/[&<>"'`=\/]/g, (char) => HTML_ENTITIES[char]);
 
 /**
  * Supported interpolation syntaxes for templates.
@@ -33,20 +32,15 @@ const INTERPOLATION_REGEX = /\[\[([^\]]+)\]\]|\$\{([^}]+)\}/g;
  * @returns {string} The interpolated string.
  */
 const interpolate = (templateStr, props) => {
-  return templateStr.replace(
-    INTERPOLATION_REGEX,
-    (_, bracketKey, dollarKey) => {
-      const trimmedKey = (bracketKey ?? dollarKey).trim();
-      // Resolve nested properties (e.g., "user.name")
-      const value = trimmedKey
-        .split('.')
-        .reduce((obj, prop) => obj?.[prop], props);
-      if (value == null) return '';
-      // Properties ending with "Html" are treated as raw/unsafe HTML
-      const isHtml = trimmedKey.endsWith('Html');
-      return isHtml ? String(value) : escapeHtml(value);
-    },
-  );
+  return templateStr.replace(INTERPOLATION_REGEX, (_, bracketKey, dollarKey) => {
+    const trimmedKey = (bracketKey ?? dollarKey).trim();
+    // Resolve nested properties (e.g., "user.name")
+    const value = trimmedKey.split('.').reduce((obj, prop) => obj?.[prop], props);
+    if (value == null) return '';
+    // Properties ending with "Html" are treated as raw/unsafe HTML
+    const isHtml = trimmedKey.endsWith('Html');
+    return isHtml ? String(value) : escapeHtml(value);
+  });
 };
 
 /**
@@ -78,10 +72,7 @@ const getPathForElement = (root, target) => {
 
 // Resolve a DOM path to an element
 const getElementByPath = (root, path) => {
-  return path.reduce(
-    (node, idx) => (node && node.children ? node.children[idx] : null),
-    root,
-  );
+  return path.reduce((node, idx) => (node && node.children ? node.children[idx] : null), root);
 };
 
 /**
@@ -125,9 +116,7 @@ const restoreInputState = (element, states) => {
       // Safer lookup for name attributes: query all named controls and match
       // the `name` attribute value directly to avoid building fragile
       // attribute selectors. This avoids ambiguity and escaping pitfalls.
-      const candidates = element.querySelectorAll(
-        'input[name], textarea[name], select[name]',
-      );
+      const candidates = element.querySelectorAll('input[name], textarea[name], select[name]');
       for (const node of candidates) {
         if (node.getAttribute('name') === state.name) {
           el = node;

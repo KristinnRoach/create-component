@@ -1,6 +1,6 @@
 // interpolation.test.js
 // Minimal tests for template interpolation (legacy and preferred syntax)
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vite-plus/test';
 import { interpolate } from '../src/componentUtils.js';
 
 describe('interpolate', () => {
@@ -26,15 +26,11 @@ describe('interpolate', () => {
 
   it('sanitizes HTML by default', () => {
     const tpl = '<div>[[foo]]</div>';
-    expect(interpolate(tpl, { foo: '<script>' })).toBe(
-      '<div>&lt;script&gt;</div>',
-    );
+    expect(interpolate(tpl, { foo: '<script>' })).toBe('<div>&lt;script&gt;</div>');
   });
 
   it('does not sanitize props ending with Html', () => {
     const tpl = '<div>[[iconHtml]]</div>';
-    expect(interpolate(tpl, { iconHtml: '<b>ok</b>' })).toBe(
-      '<div><b>ok</b></div>',
-    );
+    expect(interpolate(tpl, { iconHtml: '<b>ok</b>' })).toBe('<div><b>ok</b></div>');
   });
 });

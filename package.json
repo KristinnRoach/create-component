@@ -2,40 +2,41 @@
   "name": "@kidlib/create-component",
   "version": "0.1.6",
   "description": "Lightweight reactive vanilla JS component factory with automatic input state preservation",
-  "type": "module",
-  "exports": {
-    ".": "./src/createComponent.js"
-  },
-  "files": [
-    "src"
-  ],
-  "sideEffects": false,
-  "publishConfig": {
-    "access": "public"
-  },
   "keywords": [
     "component",
-    "vanilla-js",
-    "reactive",
+    "dom",
     "lightweight",
-    "dom"
+    "reactive",
+    "vanilla-js"
   ],
-  "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "changeset": "EDITOR='code --wait' changeset",
-    "bump": "changeset version",
-    "release": "pnpm test && changeset publish"
-  },
   "homepage": "https://github.com/KristinnRoach/create-component#readme",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/KristinnRoach/create-component.git"
   },
+  "files": [
+    "src"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/createComponent.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "vp test run",
+    "test:watch": "vp test",
+    "changeset": "EDITOR='code --wait' changeset",
+    "bump": "changeset version",
+    "release": "pnpm test && changeset publish"
+  },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",
     "jsdom": "^31.0.1",
-    "vitest": "^5.1.1"
-  }
+    "vite-plus": "catalog:"
+  },
+  "packageManager": "pnpm@12.21.0"
 }
